@@ -1,0 +1,29 @@
+##  -*-  coding: utf-8; mode: ruby -*-  ##
+##  vi: set ft=ruby
+
+load  File.expand_path("DetectOS.rb")  if File.exists?("DetectOS.rb")
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "takahiro-itou/centos7-develop"
+
+  config.vm.provider "virtualbox" do |v|
+    v.name   = "vagrant-centos7-develop"
+    v.memory = "3072"
+    v.gui    = false
+  end
+
+  config.vm.network(:forwarded_port, guest: 22, host: 15022, id: "ssh")
+  config.vm.network("private_network", ip: "192.168.33.50")
+  config.vm.synced_folder(".", "/vagrant", disabled: true)
+end
+
+load  File.expand_path('common/CommonCustomize.rb')
+
+$disk_image_file = File.expand_path('./disk/centos7-develop-sdb.vdi')
+load  File.expand_path('common/AttachIDEHdd.rb')
+
+# Provisioning(s)
+load  File.expand_path('common/UploadFiles.rb')
+load  File.expand_path('common/SetupCentos.rb')
+load  File.expand_path('common/RamDisk.rb')
+load  File.expand_path('common/SetupUsers.rb')
