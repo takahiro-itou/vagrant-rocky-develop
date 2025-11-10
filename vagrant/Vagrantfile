@@ -1,7 +1,25 @@
 ##  -*-  coding: utf-8; mode: ruby -*-  ##
 ##  vi: set ft=ruby
 
-load  File.expand_path("DetectOS.rb")  if File.exists?("DetectOS.rb")
+
+##########################################################################
+##
+##    Load Modules
+##
+
+load  File.expand_path('common/CommonCustomize.rb')
+load  File.expand_path('common/AttachIDEHdd.rb')
+
+load  File.expand_path('common/UploadFiles.rb')
+load  File.expand_path('common/SetupCentos.rb')
+load  File.expand_path('common/RamDisk.rb')
+load  File.expand_path('common/SetupUsers.rb')
+
+
+##########################################################################
+##
+##    Configuration
+##
 
 Vagrant.configure("2") do |config|
   config.vm.box = "takahiro-itou/centos7-develop"
@@ -17,13 +35,46 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder(".", "/vagrant", disabled: true)
 end
 
-load  File.expand_path('common/CommonCustomize.rb')
 
-$disk_image_file = File.expand_path('./disk/centos7-develop-sdb.vdi')
-load  File.expand_path('common/AttachIDEHdd.rb')
+##########################################################################
+##
+##    Customize Virtual Machine
+##
+
+# Common Customize.
+
+Vagrant.configure("2") do |config|
+  customize_config(config)
+  config.vm.provider "virtualbox" do |v|
+    customize_vm_provider(v)
+  end
+end
+
+# Attach Disk.
+disk_image_file = File.expand_path('./disk/rocky9-develop-sdb.vdi')
+
+Vagrant.configure("2") do |config|
+  config.vm.provider "virtualbox" do |v|
+    attach_ide_hdd(v, disk_image_file)
+  end
+  provision_newhdd_ide(config.vm)
+  config_detach_trigger(config)
+end
 
 # Provisioning(s)
-load  File.expand_path('common/UploadFiles.rb')
-load  File.expand_path('common/SetupCentos.rb')
-load  File.expand_path('common/RamDisk.rb')
-load  File.expand_path('common/SetupUsers.rb')
+
+Vagrant.configure("2") do |config|
+  provision_upload_files(config.vm)
+end
+
+Vagrant.configure("2") do |config|
+  provision_setup_centos(config.vm)
+end
+
+Vagrant.configure("2") do |config|
+  provision_ram_disk(config.vm)
+end
+
+Vagrant.configure("2") do |config|
+  provision_setup_users(config.vm)
+end
